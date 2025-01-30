@@ -1,71 +1,54 @@
-import AVFoundation
-import UIKit
 import SwiftUI
+import AVFoundation
 
-class CameraManager: NSObject, ObservableObject {
-    private var captureSession: AVCaptureSession?
-    
-    @Published var isRunning = false
-    
-    override init() {
-        super.init()
-        setupCamera()
+struct CameraView: UIViewControllerRepresentable {
+    class Coordinator: NSObject, AVCapturePhotoCaptureDelegate {
+        var parent: CameraView
+        
+        init(parent: CameraView) {
+            self.parent = parent
+        }
+        
+        // Handle camera capture if needed
     }
     
-    func setupCamera() {
-        // Initialize capture session
-        captureSession = AVCaptureSession()
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(parent: self)
+    }
+    
+    func makeUIViewController(context: Context) -> UIViewController {
+        let viewController = UIViewController()
         
-        guard let captureSession = captureSession else { return }
-        
-        // Set the video capture device (camera)
+        // Set up camera session
+        let session = AVCaptureSession()
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            print("No camera available")
-            return
+            return viewController
         }
+        let videoDeviceInput: AVCaptureDeviceInput
         
         do {
-            // Try to create an input from the video capture device
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-            
-            // Add input to the session
-            if captureSession.canAddInput(videoDeviceInput) {
-                captureSession.addInput(videoDeviceInput)
-            } else {
-                print("Failed to add input")
-                return
-            }
+            videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
-            print("Error setting up video input: \(error)")
-            return
+            return viewController
         }
         
-        // Add output for the video feed
-        let videoDataOutput = AVCaptureVideoDataOutput()
-        
-        if captureSession.canAddOutput(videoDataOutput) {
-            captureSession.addOutput(videoDataOutput)
+        if session.canAddInput(videoDeviceInput) {
+            session.addInput(videoDeviceInput)
         } else {
-            print("Failed to add output")
-            return
+            return viewController
         }
         
-        // Start the session in the background thread to avoid UI blockage
-        DispatchQueue.global(qos: .userInitiated).async {
-            captureSession.startRunning()
-            DispatchQueue.main.async {
-                self.isRunning = captureSession.isRunning
-            }
-        }
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.frame = viewController.view.bounds
+        previewLayer.videoGravity = .resizeAspectFill
+        viewController.view.layer.addSublayer(previewLayer)
+        
+        session.startRunning()
+        
+        return viewController
     }
     
-    func getPreviewLayer(for view: UIView) -> AVCaptureVideoPreviewLayer? {
-        guard let captureSession = captureSession else { return nil }
-        
-        // Create the preview layer from the capture session
-        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.frame = view.bounds
-        previewLayer.videoGravity = .resizeAspectFill
-        return previewLayer
-    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
+
+

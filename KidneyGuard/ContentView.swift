@@ -3,13 +3,10 @@ import SwiftUI
 struct ContentView: View {
     @State private var isVibrating = false // Track vibration state in the UI
     @State private var isFlashlightOn = false // Tracks flashlight state
-    @ObservedObject private var cameraManager = CameraManager() // Tracks camera state
-
+    
     var body: some View {
         VStack {
-            // Camera Preview Layer
-            CameraPreviewView(cameraManager: cameraManager)
-                .edgesIgnoringSafeArea(.top)
+            CameraView() // Display the camera view by default
             
             // Button to toggle vibration
             Button(action: {
@@ -48,25 +45,6 @@ struct ContentView: View {
             }
         }
         .padding()
-    }
-}
-
-struct CameraPreviewView: UIViewRepresentable {
-    var cameraManager: CameraManager
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        
-        // Set up the preview layer
-        if let previewLayer = cameraManager.getPreviewLayer(for: view) {
-            view.layer.addSublayer(previewLayer)
-        }
-        
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        // The view is updated as necessary
     }
 }
 
