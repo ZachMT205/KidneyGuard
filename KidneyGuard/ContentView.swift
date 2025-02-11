@@ -3,9 +3,9 @@ import SwiftUI
 struct ContentView: View {
     @State private var isVibrating = false
     @State private var isFlashlightOn = false
-    @State private var distance: String = ""
-    @State private var density: String = ""
-    @State private var totalImages: String = "5" // Default to 5
+    @State private var distance: String = "" // Distance entered by user (mm)
+    @State private var density: String = "" // Density entered by user (g/cm³)
+    @State private var totalImages: String = "5" // Default total images to 5
     @State private var surfaceTensionResult: String = "N/A"
     @State private var isAnalyzing = false
     @State private var surfaceTensionValues: [Double] = []
@@ -131,8 +131,20 @@ struct ContentView: View {
     }
 
     func calculateSurfaceTension(distance: Double, density: Double) -> Double {
-        // Placeholder formula for surface tension (replace with actual calculation)
-        return (distance * density) / 100.0 // This is a placeholder
+        // Constants for capillary rise method
+        let g = 9.81 // acceleration due to gravity in m/s^2
+        let radius = 0.001 // Assume a small capillary radius (1mm for example)
+
+        // Convert distance from mm to meters
+        let height = distance / 1000.0 // Convert from mm to meters
+        
+        // Convert density from g/cm³ to kg/m³ (multiply by 1000)
+        let densityInKgPerM3 = density * 1000
+        
+        // Calculate surface tension using the capillary rise formula
+        let surfaceTension = (height * densityInKgPerM3 * g * radius) / 2
+        
+        return surfaceTension
     }
 
     func startFlashlightAndVibration() {
