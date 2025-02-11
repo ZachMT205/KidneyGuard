@@ -8,8 +8,6 @@ struct CameraView: UIViewControllerRepresentable {
         init(parent: CameraView) {
             self.parent = parent
         }
-        
-        // Handle camera capture if needed
     }
     
     func makeCoordinator() -> Coordinator {
@@ -17,38 +15,51 @@ struct CameraView: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIViewController {
-        let viewController = UIViewController()
-        
-        // Set up camera session
-        let session = AVCaptureSession()
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            return viewController
-        }
-        let videoDeviceInput: AVCaptureDeviceInput
-        
-        do {
-            videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-        } catch {
-            return viewController
-        }
-        
-        if session.canAddInput(videoDeviceInput) {
-            session.addInput(videoDeviceInput)
-        } else {
-            return viewController
-        }
-        
-        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.frame = viewController.view.bounds
-        previewLayer.videoGravity = .resizeAspectFill
-        viewController.view.layer.addSublayer(previewLayer)
-        
-        session.startRunning()
-        
+        let viewController = CameraViewController()
         return viewController
     }
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
+// ✅ Custom UIViewController to handle layout updates
+class CameraViewController: UIViewController {
+    var session: AVCaptureSession?
+    let previewLayer = AVCaptureVideoPreviewLayer()
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupCamera()
+    }
+    
+    private func setupCamera() {
+        let session = AVCaptureSession()
+        self.session = session
+        
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
+        
+        do {
+            let videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            if session.canAddInput(videoDeviceInput) {
+                session.addInput(videoDeviceInput)
+            }
+        } catch {
+            print("Error setting up camera: \(error)")
+            return
+        }
+        
+        previewLayer.session = session
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+        
+        // ✅ Start session on the main thread
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
+        }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer.frame = view.bounds // ✅ Dynamically update frame
+    }
+}
