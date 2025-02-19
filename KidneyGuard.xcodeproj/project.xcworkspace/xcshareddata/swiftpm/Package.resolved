@@ -1,0 +1,15 @@
+{
+  "originHash" : "efc51d44b85bc2f1120166abe4057437981789b01b6fe6323aa73469db7df9b4",
+  "pins" : [
+    {
+      "identity" : "surge",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Jounce/Surge",
+      "state" : {
+        "revision" : "6e4a47e63da8801afe6188cf039e9f04eb577721",
+        "version" : "2.3.2"
+      }
+    }
+  ],
+  "version" : 3
+}
