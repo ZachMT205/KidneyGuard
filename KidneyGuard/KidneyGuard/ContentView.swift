@@ -80,15 +80,16 @@ struct ContentView: View {
                         }
                     }
                     
-                    if !isAnalyzing {
-                        Text("Average Surface Tension: \(surfaceTensionResult)")
-                            .padding()
-                            .foregroundColor(.blue)
+                    if !isAnalyzing && surfaceTensionResult != "N/A" {
+                        Text("Average Surface Tension: \(surfaceTensionResult) mN/m")
+                             .padding()
+                             .foregroundColor(.blue)
                     }
                 }
                 .padding()
                 .background(Color(UIColor.systemBackground))
             }
+            .navigationBarTitle("KidneyGuard", displayMode: .inline)
         }
     }
     
@@ -149,7 +150,7 @@ struct ContentView: View {
     
     func stopFlashlightAndVibration() {
         Flashlight.turnOff()
-        Vibrate.stopVibrating()
+        Vibrate.stopVibration()
         isFlashlightOn = false
         isVibrating = false
     }
