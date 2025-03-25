@@ -1,17 +1,6 @@
 import Foundation
 import CoreGraphics
 
-// MARK: - Minimal ImageGroup
-
-/// Define a minimal ImageGroup if you don’t use the full CoreData version.
-/// Adjust properties as needed.
-struct ImageGroup {
-    var resolution: Double = 39500.0  // example default
-    var frequency: Double = 144.5     // example default
-}
-
-// MARK: - CGPoint Arithmetic Operators
-
 extension CGPoint {
     static func - (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
         return CGPoint(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
@@ -38,10 +27,7 @@ extension CGPoint {
     }
 }
 
-// MARK: - Data Extension to Convert to Array
-
 extension Data {
-    /// Converts Data to an array of the specified type.
     func toArray<T>(type: T.Type) -> [T] {
         let count = self.count / MemoryLayout<T>.size
         return self.withUnsafeBytes { pointer in
@@ -49,9 +35,7 @@ extension Data {
             return Array(buffer.prefix(count))
         }
     }
-}
-
-extension Data {
+    
     init<T>(fromArray array: [T]) {
         self = array.withUnsafeBufferPointer { Data(buffer: $0) }
     }

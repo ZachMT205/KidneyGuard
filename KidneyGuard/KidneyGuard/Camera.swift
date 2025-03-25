@@ -62,7 +62,6 @@ class CameraViewController: UIViewController {
     var totalImages: Int
     var coordinator: CameraView.Coordinator
     
-    // Use a Timer to schedule captures.
     private var captureTimer: Timer?
     private var captureCount = 0
     
@@ -121,7 +120,7 @@ class CameraViewController: UIViewController {
     }
     
     func startCapture() {
-        guard captureTimer == nil else { return } // Prevent multiple timers
+        guard captureTimer == nil else { return }
         captureCount = 0
         captureTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] timer in
             guard let self = self else { return }

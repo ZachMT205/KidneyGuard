@@ -4,20 +4,18 @@ import UIKit
 struct ContentView: View {
     @State private var distance: String = ""         // in mm
     @State private var density: String = ""          // Currently unused
-    @State private var totalImages: String = "5"       // Number of photos to capture
+    @State private var totalImages: String = "5"     // Number of photos to capture
     @State private var surfaceTensionResult: String = "N/A"
     @State private var isAnalyzing = false
-    @State private var isCapturing = false           // Controls when the camera starts capture
-    @State private var capturedImages: [UIImage] = []  // Captured images (as Binding)
+    @State private var isCapturing = false
+    @State private var capturedImages: [UIImage] = []
     
-    // Flashlight and vibration states.
     @State private var isFlashlightOn = false
     @State private var isVibrating = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Pass capturedImages as a binding.
                 CameraView(
                     totalImages: Binding(
                         get: { Int(totalImages) ?? 5 },
@@ -35,7 +33,6 @@ struct ContentView: View {
                 .clipped()
                 
                 VStack(spacing: 12) {
-                    // Only the first text field has a toolbar with "Done".
                     TextField("Enter distance (mm)", text: $distance)
                         .padding()
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -104,14 +101,12 @@ struct ContentView: View {
             surfaceTensionResult = "Invalid input"
             return
         }
-        // Clear previous images and reset flags.
         capturedImages = []
         surfaceTensionResult = "N/A"
         isAnalyzing = true
         
         startFlashlightAndVibration()
         
-        // Wait 3 seconds for stabilization, then trigger capture.
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             print("Starting capture...")
             self.isCapturing = true
@@ -129,13 +124,12 @@ struct ContentView: View {
         }
         
         DispatchQueue.global(qos: .userInitiated).async {
-            // analyzeCapturedImages uses CapCam's ImageProcessor (with Surge/Accelerate internally).
             let tension = analyzeCapturedImages(images: images, distance: distanceValue)
             DispatchQueue.main.async {
                 self.surfaceTensionResult = String(format: "%.2f", tension)
                 self.isAnalyzing = false
-                self.isCapturing = false  // Reset capture flag for subsequent runs.
-                self.capturedImages = []  // Clear images for next analysis.
+                self.isCapturing = false
+                self.capturedImages = []
                 stopFlashlightAndVibration()
             }
         }
