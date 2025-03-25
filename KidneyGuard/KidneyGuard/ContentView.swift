@@ -106,11 +106,7 @@ struct ContentView: View {
         isAnalyzing = true
         
         startFlashlightAndVibration()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            print("Starting capture...")
-            self.isCapturing = true
-        }
+        self.isCapturing = true  // Start capturing immediately with vibration
     }
     
     func processImages(images: [UIImage]) {
@@ -129,8 +125,7 @@ struct ContentView: View {
                 self.surfaceTensionResult = String(format: "%.2f", tension)
                 self.isAnalyzing = false
                 self.isCapturing = false
-                self.capturedImages = []
-                stopFlashlightAndVibration()
+                stopFlashlightAndVibration()  // Stop only after analysis
             }
         }
     }

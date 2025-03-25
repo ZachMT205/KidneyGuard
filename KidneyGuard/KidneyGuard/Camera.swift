@@ -14,13 +14,14 @@ struct CameraView: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIViewController {
-        CameraViewController(totalImages: totalImages, coordinator: context.coordinator)
+        let vc = CameraViewController(totalImages: totalImages, coordinator: context.coordinator)
+        return vc
     }
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         if let vc = uiViewController as? CameraViewController {
             if isCapturing {
-                vc.startCapture()
+                vc.startCapture(totalImages: totalImages, processImages: processCapturedImages)
             } else {
                 vc.stopCapture()
             }
@@ -119,18 +120,21 @@ class CameraViewController: UIViewController {
         output.capturePhoto(with: settings, delegate: coordinator)
     }
     
-    func startCapture() {
+    func startCapture(totalImages: Int, processImages: @escaping ([UIImage]) -> Void) {
         guard captureTimer == nil else { return }
+        self.totalImages = totalImages
         captureCount = 0
-        captureTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] timer in
+        let pulseInterval: TimeInterval = 0.5  // Sync with Vibrate.swift (was 0.2s)
+        captureTimer = Timer.scheduledTimer(withTimeInterval: pulseInterval, repeats: true) { [weak self] timer in
             guard let self = self else { return }
-            if self.captureCount < self.totalImages {
+            if self.captureCount < totalImages {
                 self.captureImage()
                 self.captureCount += 1
             } else {
                 timer.invalidate()
                 self.captureTimer = nil
-                print("Timer capture complete")
+                print("Capture complete, processing...")
+                processImages(self.coordinator.parent.capturedImages)
             }
         }
     }
